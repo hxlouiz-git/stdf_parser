@@ -6,11 +6,9 @@ class ATRRecord(NamedTuple):
     MOD_TIM: int  # Modification time
     CMD_LINE: str  # Command line
 
-
 class BPSRecord(NamedTuple):
 
     SEQ_NAME: str  # Sequence name
-
 
 class DTRRecord(NamedTuple):
 
@@ -49,6 +47,8 @@ class FTRRecord(NamedTuple):
     ALARM_ID:str
     PROG_TXT:str
     RSLT_TXT:str
+    PATG_NUM:int
+    SPIN_MAP:str
     RESULT:int
 
 class HBRRecord(NamedTuple):
@@ -59,7 +59,6 @@ class HBRRecord(NamedTuple):
     HBIN_CNT: int
     HBIN_PF: str
     HBIN_PCT: str
-
 
 class MIRRecord(NamedTuple):
     SETUP_T: datetime  # Setup time
@@ -100,7 +99,6 @@ class MIRRecord(NamedTuple):
     ROM_COD: str
     SERL_NUM: str
     SUPR_NAM: str
-
 
 class MPRRecord(NamedTuple):
 
@@ -289,7 +287,6 @@ class WCRRecord(NamedTuple):
     CENTER_Y: int
     POS_X: str
     POS_Y: str
-
 
 class WIRRecord(NamedTuple):
 
