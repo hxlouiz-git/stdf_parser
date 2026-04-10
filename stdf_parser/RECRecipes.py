@@ -235,7 +235,7 @@ class PIRRecipe(RecipeBase):
     REC_TYP = 5
     REC_SUB = 10
     FIELDS = [
-        ("HEAD_NUM", partial(write_u, 1), 0),
+        ("HEAD_NUM", partial(write_u, 1), 1),
         ("SITE_NUM", partial(write_u, 1), 0)
     ]
 
@@ -270,7 +270,7 @@ class PRRRecipe(RecipeBase):
     REC_TYP = 5
     REC_SUB = 20
     FIELDS = [
-        ("HEAD_NUM", partial(write_u, 1), 0),
+        ("HEAD_NUM", partial(write_u, 1), 1),
         ("SITE_NUM", partial(write_u, 1), 0),
         ("PART_FLG", partial(write_b, 1), 0),
         ("NUM_TEST", partial(write_u, 2), 0),
@@ -356,7 +356,7 @@ class SDRRecipe(RecipeBase):
     ]
 
 class TSRRecipe(RecipeBase):
-    REC_TYP = 1
+    REC_TYP = 10
     REC_SUB = 30
     FIELDS = [
         ("HEAD_NUM", partial(write_u, 1), 0),

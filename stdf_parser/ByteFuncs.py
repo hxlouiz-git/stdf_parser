@@ -3,6 +3,7 @@ import struct
 import numpy as np
 
 
+
 #region Byte extraction functions
 
 def get_r_arr(val,count,data):
@@ -28,7 +29,7 @@ def get_cn_arr(count,data):
 
 def get_r(val,data):
     try:
-        content = data.read(val)
+        content = data#.read(val)
         fmt = '<f' if val == 4 else '<d'
         ret = struct.unpack(fmt, content)[0]
         return ret
@@ -166,12 +167,18 @@ def write_c(val, value):
 def write_b(val, value):
     """Write fixed-length bit-encoded data (B*6).
     Truncated or zero-padded to exactly val bytes."""
-    data = bytes(value)[:val]
+    if isinstance(value, int):
+        # If value is an int, convert it to bytes of length val
+        data = value.to_bytes(val, byteorder='little', signed=False)[:val]
+    else:
+        data = bytes(value)[:val]
     return data + b'\x00' * (val - len(data))
 
 def write_bn(value):
     """Write a variable-length bit-encoded field (B*n).
     First byte = unsigned count of bytes to follow."""
+    if value is None or value == 'no data':
+        return b'\x00'
     data = bytes(value)
     return bytes([len(data)]) + data
 
@@ -186,3 +193,11 @@ def write_dn(value, bit_count=None):
     return write_u(2, bit_count) + data
 
 #endregion
+
+
+if __name__ == "__main__":
+    test = write_b(1,0x40)
+    print(test)
+
+
+    print(f"data: {[f'0x{b:02X}' for b in test]}")
