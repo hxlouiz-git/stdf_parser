@@ -45,6 +45,7 @@ class RecipeBase:
         return REC_LEN + REC_TYP + REC_SUB + body
 
 
+
 class ATRRecipe(RecipeBase):
     REC_TYP = 0
     REC_SUB = 20

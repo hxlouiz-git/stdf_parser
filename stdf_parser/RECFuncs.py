@@ -8,7 +8,7 @@ from stdf_parser.Debugger import Debugger
 
 from stdf_parser.ByteFuncs import get_u , get_c ,get_cn, get_r, get_b, get_bn, get_i, get_dn, get_all, get_r_arr, get_u_arr, get_cn_arr
 from stdf_parser.RecordTuples import *
-
+import traceback
 
 
 
@@ -41,6 +41,7 @@ class RecordContainer():
             self.pos += size
             return data
         else:
+            return np.nan
             raise Exception("Attempting to read beyond record length")
     
     def length_check(self, size):
@@ -63,7 +64,7 @@ def debug_wrapper(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         # Allow debugFlag to be passed as argument, otherwise use self.debugFlag
-        debug_enabled = kwargs['debug_enabled']
+        debug_enabled = kwargs['debug_enabled'] if 'debug_enabled' in kwargs else getattr(args[0], 'debugFlag', False)
 
         if debug_enabled:
             record=func.__name__
@@ -74,6 +75,7 @@ def debug_wrapper(func):
         try:
             result = func(*args, **kwargs)
         except Exception as e:
+            traceback.print_exc()
             print(f"simulating {func.__name__}")
             result = None
 
@@ -226,13 +228,16 @@ def RecordSelect(f,containers):
 
     return pos
 
+
+
+
 @parse_record
 def get_headers(data: RecordContainer):
     REC_LEN=get_u(2,data)
     REC_TYP=get_u(1,data)
     REC_SUB=get_u(1,data)
 
-    return REC_LEN, REC_TYP, REC_SUB
+    return HeaderRecord(REC_LEN, REC_TYP, REC_SUB)
 
 @parse_record
 def ATR(data: RecordContainer):
@@ -718,10 +723,10 @@ def PTR(data: RecordContainer):
     HLM_SCAL = get_u(1,data)
 
     LO_LIMIT = get_r(4,data)
-    if OPT_FLAG&64 == 64:
+    if OPT_FLAG[0]&64 == 64:
         LO_LIMIT = np.nan
     HI_LIMIT = get_r(4,data)
-    if OPT_FLAG&128 == 128:
+    if OPT_FLAG[0]&128 == 128:
         HI_LIMIT = np.nan
     UNITS = get_cn(data)
     

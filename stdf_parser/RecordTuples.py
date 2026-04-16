@@ -1,6 +1,14 @@
 from typing import NamedTuple
 from datetime import datetime
 
+
+class HeaderRecord(NamedTuple):
+
+    REC_LEN: int  # Record length
+    REC_TYP: int  # Record type
+    REC_SUB: int  # Record subtype
+
+
 class ATRRecord(NamedTuple):
 
     MOD_TIM: int  # Modification time

@@ -29,7 +29,7 @@ def get_cn_arr(count,data):
 
 def get_r(val,data):
     try:
-        content = data#.read(val)
+        content = data.read(val)
         fmt = '<f' if val == 4 else '<d'
         ret = struct.unpack(fmt, content)[0]
         return ret
