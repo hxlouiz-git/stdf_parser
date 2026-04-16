@@ -1,5 +1,5 @@
 
-from RECRecipes import *
+from stdf_parser.RECRecipes import *
 
 class Writer:
     def __init__(self, filepath):

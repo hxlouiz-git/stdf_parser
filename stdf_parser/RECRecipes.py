@@ -2,7 +2,7 @@ from typing import NamedTuple
 from datetime import datetime
 from enum import Enum
 from functools import partial
-from ByteFuncs import *
+from stdf_parser.ByteFuncs import *
 
 
 class RecipeBase:

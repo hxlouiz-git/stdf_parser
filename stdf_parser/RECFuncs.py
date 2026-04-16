@@ -4,10 +4,10 @@ from functools import wraps
 import numpy as np
 
 
-from Debugger import Debugger
+from stdf_parser.Debugger import Debugger
 
-from ByteFuncs import get_u , get_c ,get_cn, get_r, get_b, get_bn, get_i, get_dn, get_all, get_r_arr, get_u_arr, get_cn_arr
-from RecordTuples import *
+from stdf_parser.ByteFuncs import get_u , get_c ,get_cn, get_r, get_b, get_bn, get_i, get_dn, get_all, get_r_arr, get_u_arr, get_cn_arr
+from stdf_parser.RecordTuples import *
 
 
 
