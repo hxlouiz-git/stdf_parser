@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stdf_parser"
-version = "0.1.5"
+version = "0.1.6"
 description = "STDF (Standard Test Data Format) parser"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -25,8 +25,5 @@ dev = [
 Homepage = "https://github.com/yourusername/stdf_parser"
 Repository = "https://github.com/yourusername/stdf_parser"
 
-[tool.setuptools]
-package-dir = {"" = "stdf_parser"}
-
 [tool.setuptools.packages.find]
-where = ["stdf_parser"]
+include = ["stdf_parser*"]
