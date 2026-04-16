@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "numpy>=1.21"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "stdf_parser"
-version = "0.1.4"
+version = "0.1.5"
 description = "STDF (Standard Test Data Format) parser"
 readme = "README.md"
 requires-python = ">=3.8"
