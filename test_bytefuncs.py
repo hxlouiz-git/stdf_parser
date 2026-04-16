@@ -6,7 +6,7 @@ import io
 import math
 import pytest
 
-from ByteFuncs import (
+from stdf_parser.ByteFuncs import (
     get_r, get_r_arr,
     get_u, get_u_arr,
     get_i,
