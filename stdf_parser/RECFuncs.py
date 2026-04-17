@@ -684,24 +684,29 @@ def PMR(data: RecordContainer):
 
 @parse_record
 def PRR(data: RecordContainer):
-    
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    PART_FLG = get_b(1,data)
-    NUM_TEST = get_u(2,data)
-    HARD_BIN = get_u(2,data)
-    SOFT_BIN = get_u(2,data)
-    X_COORD = get_u(2,data)
-    Y_COORD = get_u(2,data)
-    TEST_T = get_u(4,data)
-    TEST_T=TEST_T/1000
-    PART_ID = get_cn(data)
-    PART_TXT = get_cn(data)
-    PART_FIX = get_bn(data) #B*n
 
-    return PRRRecord(HEAD_NUM, SITE_NUM, PART_FLG, NUM_TEST, 
-                     HARD_BIN, SOFT_BIN, X_COORD, Y_COORD, 
-                     TEST_T, PART_ID, PART_TXT, PART_FIX)
+    fields = {}
+
+    try:
+    
+        fields['HEAD_NUM'] = get_u(1,data)
+        fields['SITE_NUM'] = get_u(1,data)
+        fields['PART_FLG'] = get_b(1,data)
+        fields['NUM_TEST'] = get_u(2,data)
+        fields['HARD_BIN'] = get_u(2,data)
+        fields['SOFT_BIN'] = get_u(2,data)
+        fields['X_COORD'] = get_u(2,data)
+        fields['Y_COORD'] = get_u(2,data)
+        fields['TEST_T'] = get_u(4,data)
+        fields['TEST_T'] = fields['TEST_T']/1000
+        fields['PART_ID'] = get_cn(data)
+        fields['PART_TXT'] = get_cn(data)
+        fields['PART_FIX'] = get_bn(data) #B*n
+
+    except RecordTruncated:
+        pass
+
+    return PRRRecord(**fields)
 
 @parse_record
 def PTR(data: RecordContainer):

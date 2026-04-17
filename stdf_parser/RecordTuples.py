@@ -204,8 +204,8 @@ class PRRRecord(NamedTuple):
     Y_COORD: int
     TEST_T: float
     PART_ID: str
-    PART_TXT: str
-    PART_FIX: str
+    PART_TXT: str = ''
+    PART_FIX: str = ''
 
 class PTRRecord(NamedTuple):
 

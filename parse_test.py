@@ -1,6 +1,6 @@
 from stdf_parser.ByteFuncs import get_u, get_i
-from stdf_parser.RECFuncs import get_headers, PTR
-from stdf_parser.RecordTuples import HeaderRecord, PTRRecord
+from stdf_parser.RECFuncs import get_headers, PTR, PRR
+from stdf_parser.RecordTuples import HeaderRecord, PTRRecord, PRRRecord
 
 import os
 
@@ -33,5 +33,7 @@ with open(filename, "rb") as f:
                 var:PTRRecord = PTR(fsub,recLEN)
 
                 #print(var)
+        elif recTYP == 5 and recSUB == 20:
+                outVar2: PRRRecord = PRR(fsub, recLEN)
 
 print("done")
