@@ -209,26 +209,28 @@ class PRRRecord(NamedTuple):
 
 class PTRRecord(NamedTuple):
 
+    # Mandatory fields
     TEST_NUM: int
     HEAD_NUM: int
     SITE_NUM: int
     TEST_FLG: bytes
     PARM_FLG: bytes
     RESULT: float
-    TEST_TXT: str
-    ALARM_ID: str
-    OPT_FLAG: bytes
-    RES_SCAL: int
-    LLM_SCAL: int
-    HLM_SCAL: int
-    LO_LIMIT: float
-    HI_LIMIT: float
-    UNITS: str
-    C_RESFMT: str
-    C_LLMFMT: str
-    C_HLMFMT: str
-    LO_SPEC: float
-    HI_SPEC: float
+    # Optional fields — defaults used when record is truncated
+    TEST_TXT: str    = ''
+    ALARM_ID: str    = ''
+    OPT_FLAG: bytes  = None
+    RES_SCAL: int    = 0
+    LLM_SCAL: int    = 0
+    HLM_SCAL: int    = 0
+    LO_LIMIT: float  = float('nan')
+    HI_LIMIT: float  = float('nan')
+    UNITS: str       = ''
+    C_RESFMT: str    = ''
+    C_LLMFMT: str    = ''
+    C_HLMFMT: str    = ''
+    LO_SPEC: float   = float('nan')
+    HI_SPEC: float   = float('nan')
 
 class RDRRecord(NamedTuple):
 

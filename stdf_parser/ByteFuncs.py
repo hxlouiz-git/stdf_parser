@@ -3,6 +3,10 @@ import struct
 import numpy as np
 
 
+class RecordTruncated(Exception):
+    """Raised when a read goes beyond the declared record length."""
+    pass
+
 
 #region Byte extraction functions
 
@@ -33,6 +37,8 @@ def get_r(val,data):
         fmt = '<f' if val == 4 else '<d'
         ret = struct.unpack(fmt, content)[0]
         return ret
+    except RecordTruncated:
+        raise
     except:
         return np.nan
 
@@ -45,6 +51,8 @@ def get_u(val,data):
             ret |= content[i] << (8 * i)
 
         return ret
+    except RecordTruncated:
+        raise
     except:
         return np.nan
 
@@ -72,6 +80,8 @@ def get_cn(data):
 
     #   print("MBgetC=",ret)
         return ret
+    except RecordTruncated:
+        raise
     except:
         return 'no data'
     
@@ -83,6 +93,8 @@ def get_dn(data):
         ret = get_b(byte_length, data)
 
         return ret
+    except RecordTruncated:
+        raise
     except:
         return 0
 
@@ -106,6 +118,8 @@ def get_bn(data):
 
     #   print("MBgetC=",ret)
         return ret
+    except RecordTruncated:
+        raise
     except:
         return 0
 

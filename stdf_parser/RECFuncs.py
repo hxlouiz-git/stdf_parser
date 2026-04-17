@@ -6,7 +6,7 @@ import numpy as np
 
 from stdf_parser.Debugger import Debugger
 
-from stdf_parser.ByteFuncs import get_u , get_c ,get_cn, get_r, get_b, get_bn, get_i, get_dn, get_all, get_r_arr, get_u_arr, get_cn_arr
+from stdf_parser.ByteFuncs import get_u , get_c ,get_cn, get_r, get_b, get_bn, get_i, get_dn, get_all, get_r_arr, get_u_arr, get_cn_arr, RecordTruncated
 from stdf_parser.RecordTuples import *
 import traceback
 
@@ -41,8 +41,7 @@ class RecordContainer():
             self.pos += size
             return data
         else:
-            return np.nan
-            raise Exception("Attempting to read beyond record length")
+            raise RecordTruncated()
     
     def length_check(self, size):
         return self.pos + size <= self.length
@@ -707,40 +706,36 @@ def PRR(data: RecordContainer):
 @parse_record
 def PTR(data: RecordContainer):
 
-    TEST_NUM = get_u(4,data)
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    TEST_FLG = get_b(1,data)
-    PARM_FLG = get_b(1,data)
-    RESULT = get_r(4,data)
-    TEST_TXT = get_cn(data)
-    ALARM_ID = get_cn(data)
+    fields = {}
+    try:
+        fields['TEST_NUM'] = get_u(4,data)
+        fields['HEAD_NUM'] = get_u(1,data)
+        fields['SITE_NUM'] = get_u(1,data)
+        fields['TEST_FLG'] = get_b(1,data)
+        fields['PARM_FLG'] = get_b(1,data)
+        fields['RESULT']   = get_r(4,data)
+        fields['TEST_TXT'] = get_cn(data)
+        fields['ALARM_ID'] = get_cn(data)
+        fields['OPT_FLAG'] = get_b(1,data)
+        fields['RES_SCAL'] = get_i(1,data)
+        fields['LLM_SCAL'] = get_u(1,data)
+        fields['HLM_SCAL'] = get_u(1,data)
+        fields['LO_LIMIT'] = get_r(4,data)
+        if fields['OPT_FLAG'][0]&64 == 64:
+            fields['LO_LIMIT'] = np.nan
+        fields['HI_LIMIT'] = get_r(4,data)
+        if fields['OPT_FLAG'][0]&128 == 128:
+            fields['HI_LIMIT'] = np.nan
+        fields['UNITS']    = get_cn(data)
+        fields['C_RESFMT'] = get_cn(data)
+        fields['C_LLMFMT'] = get_cn(data)
+        fields['C_HLMFMT'] = get_cn(data)
+        fields['LO_SPEC']  = get_r(4,data)
+        fields['HI_SPEC']  = get_r(4,data)
+    except RecordTruncated:
+        pass
 
-    OPT_FLAG = get_b(1,data) #B1
-
-    RES_SCAL = get_i(1,data)
-    LLM_SCAL = get_u(1,data)
-    HLM_SCAL = get_u(1,data)
-
-    LO_LIMIT = get_r(4,data)
-    if OPT_FLAG[0]&64 == 64:
-        LO_LIMIT = np.nan
-    HI_LIMIT = get_r(4,data)
-    if OPT_FLAG[0]&128 == 128:
-        HI_LIMIT = np.nan
-    UNITS = get_cn(data)
-    
-    C_RESFMT = get_cn(data)
-    C_LLMFMT = get_cn(data)
-    C_HLMFMT = get_cn(data)
-    LO_SPEC = get_r(4,data)
-    HI_SPEC = get_r(4,data)
-
-    return PTRRecord(TEST_NUM, HEAD_NUM, SITE_NUM, TEST_FLG, 
-                     PARM_FLG, RESULT, TEST_TXT, ALARM_ID, 
-                     OPT_FLAG, RES_SCAL, LLM_SCAL, HLM_SCAL, 
-                     LO_LIMIT, HI_LIMIT, UNITS, C_RESFMT,
-                     C_LLMFMT, C_HLMFMT, LO_SPEC, HI_SPEC)
+    return PTRRecord(**fields)
 
 # def PTR2(fsub,length,containers):
     

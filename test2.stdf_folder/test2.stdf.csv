@@ -1,0 +1,31 @@
+File name,test2.stdf
+SetupTime,1970-01-01 00:20:12
+StartTime,1970-01-01 15:05:24
+FinishTime,1970-01-01 01:29:47
+ProgramName,adum1251
+Lot,testlot
+Test time (Bin1 parts),0
+Test time (All parts),0.0
+Parts tested,1
+Yield,0.0
+TesterName,
+TesterType,simtest
+Product,simprog
+Operator,HDs
+ExecType,
+ExecRevision,
+Temperature,
+DesignRevision,
+Handler type,
+Handler ID,
+ProbecardType,
+ProbecardID,
+HardwareMap,
+TSR-Head,TEST_NUM,TEST_NAM,TEST_TYP,Total Fails,Site 0
+Parameter,SBIN,HBIN,DIE_X,DIE_Y,SITE,TIME,TOTAL_TEST,LOT_ID,WAFER_ID,X Coords
+Test#,,,,,,,,,,10
+Patterns,,,,,,,,,,
+Unit,,,,,,,,,,
+HighL,,,,,,,,,,
+LowL,,,,,,,,,,
+,19,0,67,41,0,0.0,1,,,67.0

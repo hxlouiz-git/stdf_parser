@@ -4,7 +4,7 @@ from stdf_parser.RecordTuples import HeaderRecord, PTRRecord
 
 import os
 
-filename = "S65731.2_ADuM4185_IC3_v30905p01a_STS-232_20250728_74228.stdf"
+filename = "LTC4284IUHG_1037727-1_25C_FT-TRIM_1A_CLASS_BOXSTOCK.std_1"
 
 with open(filename, "rb") as f:
     fsize = os.path.getsize(filename)
@@ -25,9 +25,13 @@ with open(filename, "rb") as f:
         #print(f"REC_LEN: {recLEN}, REC_TYP: {recTYP}, REC_SUB: {recSUB}")
         fsub = f.read(recLEN)
 
+        pos = f.tell()
+
 
         if recTYP==15:
             if recSUB==10:      # PTR()   
                 var:PTRRecord = PTR(fsub,recLEN)
 
-                print(var)
+                #print(var)
+
+print("done")
