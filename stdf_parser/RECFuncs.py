@@ -96,136 +96,55 @@ def contents_wrapper(func):
 def parse_record(func):
     return debug_wrapper(contents_wrapper(func))
 
-def RecordSelect(f,containers):
+_DISPATCH = {
+    (0,  10): lambda b, n: FAR(b, n),
+    (0,  20): lambda b, n: ATR(b, n),
+    (1,  10): lambda b, n: MIR(b, n),
+    (1,  20): lambda b, n: MRR(b, n),
+    (1,  30): lambda b, n: PCR(b, n),
+    (1,  40): lambda b, n: HBR(b, n),
+    (1,  50): lambda b, n: SBR(b, n),
+    (1,  60): lambda b, n: PMR(b, n),
+    (1,  62): lambda b, n: PGR(b, n),
+    (1,  63): lambda b, n: PLR(b, n),
+    (1,  70): lambda b, n: RDR(b, n),
+    (1,  80): lambda b, n: SDR(b, n),
+    (2,  10): lambda b, n: WIR(b, n),
+    (2,  20): lambda b, n: WRR(b, n),
+    (2,  30): lambda b, n: WCR(b, n),
+    (5,  10): lambda b, n: PIR(b, n),
+    (5,  20): lambda b, n: PRR(b, n),
+    (10, 30): lambda b, n: TSR(b, n),
+    (15, 10): lambda b, n: PTR(b, n),
+    (15, 15): lambda b, n: MPR(b, n),
+    (15, 20): lambda b, n: FTR(b, n),
+    (20, 10): lambda b, n: BPS(b, n),
+    (20, 20): lambda b, n: EPS(b, n),
+    (50, 10): lambda b, n: GDR(b, n),
+    (50, 30): lambda b, n: DTR(b, n),
+}
 
-    if containers.debugFlag:
-        containers.DebuggerStartTimer("file read")
+def RecordSelect(f):
+    header_bytes = f.read(4)
+    header = get_headers(header_bytes, 4)
+    REC_LEN, REC_TYP, REC_SUB = header.REC_LEN, header.REC_TYP, header.REC_SUB
+    body = f.read(REC_LEN)
+    pos = f.tell()
 
+    parser = _DISPATCH.get((REC_TYP, REC_SUB))
 
-    NULL_REC=0
-    fsub=f.read(4)
-    REC_LEN,REC_TYP,REC_SUB=get_headers(fsub,4)
-    fsub=f.read(REC_LEN)
-    pos=f.tell()
-
-    if containers.debugFlag:
-        data = f"Pos: {pos} REC_LEN: {REC_LEN} REC_TYP: {REC_TYP} REC_SUB: {REC_SUB} "
-        containers.DebuggerWrite("RECfile",f"{data}")
-        containers.DebuggerStopTimer("file read")
-
-
-    if REC_TYP==15:
-        if REC_SUB==10:      # PTR()   
-            PTR2(fsub,REC_LEN,containers)  # [TEST_TXT, TEST_NUM, UNITS, HI_LIMIT, LO_LIMIT, RES_SCAL]
-
-        elif REC_SUB==15:    # MPR()
-            MPR2(fsub,REC_LEN,containers)  # [TEST_NUM,RESULT,SITE_NUM,TEST_TXT,var,RTN_ICNT]
-        
-        elif REC_SUB==20:    # FTR()
-            FTR2(fsub,REC_LEN,containers)    # [TEST_NUM,RESULT,SITE_NUM,TEST_TXT]
-
-        else:
-            NULL_REC=1
-    elif REC_TYP==5:
-        if REC_SUB==10:      # PIR()
-            PIR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==20:    # PRR()
-            PRR2(fsub,REC_LEN,containers)   # return [PART_ID,SOFT_BIN,HARD_BIN,X_COORD,Y_COORD,SITE_NUM,TEST_T,NUM_TEST] 
-
-        else:
-            NULL_REC=1
-    elif REC_TYP==0:
-        if REC_SUB==10:      # FAR()
-            FAR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==20:    # ATR()
-            ATR2(fsub,REC_LEN,containers)
-            
-        else:
-            NULL_REC=1
-    elif REC_TYP==1:
-        if REC_SUB==10:    # MIR()
-            MIR2(fsub,REC_LEN,containers) #see above legend
-
-        elif REC_SUB==20:    # MRR()
-            MRR2(fsub,REC_LEN,containers)  #LOTDet[3]=MRR(fsub,REC_LEN) #End time
-
-        elif REC_SUB==30:    # PCR()
-            PCR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==40:    # HBR()
-            HBR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==50:    # SBR()
-            SBR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==60:    # PMR()
-            PMR2(fsub,REC_LEN,containers) #[PMR_INDX,CHAN_TYP,CHAN_NAM,PHY_NAM,LOG_NAM,HEAD_NUM,SITE_NUM]
-        
-        elif REC_SUB==62:    # PGR()
-            PGR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==63:    # PLR()
-            PLR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==70:    # RDR()
-            RDR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==80:    # SDR()
-            SDR2(fsub,REC_LEN,containers) #[HAND_TYP,HAND_ID,CARD_TYP,CARD_ID,DIB_ID]
-
-        else:
-            NULL_REC=1
-    elif REC_TYP==2:
-        if REC_SUB==10:      # WIR()
-            WIR2(fsub,REC_LEN,containers) 
-
-        elif REC_SUB==20:    # WRR()
-            WRR2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==30:    # WCR()
-            WCR2(fsub,REC_LEN,containers)
-
-        else:
-            NULL_REC=1        
-    elif REC_TYP==10:
-        if REC_SUB==30:      # TSR()
-            TSR2(fsub,REC_LEN,containers) #0HEAD_NUM,1SITE_NUM,2TEST_TYP,3TEST_NUM,4EXEC_CNT,5FAIL_CNT,6TEST_NAM
-
-        else:
-            NULL_REC=1         
-    elif REC_TYP==20:
-        if REC_SUB==10:      # BPS() 
-            BPS2(fsub,REC_LEN,containers)
-
-        elif REC_SUB==20:    # EPS()
-            EPS2(fsub,REC_LEN,containers)
-
-        else:
-            NULL_REC=1
-    elif REC_TYP==50:
-        if REC_SUB==10:      # GDR()
-            GDR2(fsub,REC_LEN,containers)
-            
-        elif REC_SUB==30:    # DTR()
-            DTR2(fsub,REC_LEN,containers)
-
-        else:
-            NULL_REC=1
+    if parser is not None:
+        record = parser(body, REC_LEN)
     else:
-        NULL_REC=2
+        known_type = any(t == REC_TYP for t, _ in _DISPATCH)
+        if known_type:
+            print(f"Unrecognized record sub type REC_TYP: {REC_TYP} REC_SUB: {REC_SUB}, will attempt to skip.")
+        else:
+            print(f"Unrecognized record type REC_TYP: {REC_TYP} REC_SUB: {REC_SUB}, will now terminate. Try ParamOnly mode or send STDF to developer for checking")
+            f.seek(0, 2)
+        record = NULLREC(body, REC_LEN)
 
-    if NULL_REC==1:
-        print("Unrecognized record sub type REC_TYP: " + str(REC_TYP) + " REC_SUB: " + str(REC_SUB) +" , will attempt to skip.")
-        NULL_REC=0
-        NULLREC(fsub,pos,REC_TYP,REC_SUB,containers)
-    elif NULL_REC==2:
-        print("Unrecognized record type REC_TYP: " + str(REC_TYP) + " REC_SUB: " + str(REC_SUB) +", will now terminate. Try ParamOnly mode or send STDF to developer for checking")
-        NULLREC(fsub,pos,REC_TYP,REC_SUB,containers)
-        f.seek(0,2) #go to end of file to terminate stdf reading
-
-    return pos
+    return pos, record
 
 
 

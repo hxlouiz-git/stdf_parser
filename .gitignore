@@ -135,3 +135,5 @@ Thumbs.db
 
 #others
 #STDF-v4-spec.pdf
+*.csv
+*.stdf
