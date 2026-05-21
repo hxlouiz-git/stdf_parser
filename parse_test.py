@@ -4,7 +4,7 @@ from stdf_parser.RecordTuples import HeaderRecord, PTRRecord, PRRRecord
 
 import os
 
-filename = "LTC4284IUHG_1037727-1_25C_FT-TRIM_1A_CLASS_BOXSTOCK.std_1"
+filename = "STZ0394HBR05_ASE-252500248.000_FT2_125C_FT21ST01_ACPWSFTD1X-006_20241213090010.std"
 
 with open(filename, "rb") as f:
     fsize = os.path.getsize(filename)

@@ -160,24 +160,36 @@ def get_headers(data: RecordContainer):
 @parse_record
 def ATR(data: RecordContainer):
 
-    MOD_TIM = get_u(4, data)
-    CMD_LINE = get_cn(data)
+    fields = {}
+    try:
+        fields['MOD_TIM'] = get_u(4, data)
+        fields['CMD_LINE'] = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return ATRRecord(MOD_TIM, CMD_LINE)
+    return ATRRecord(**fields)
 
 @parse_record
 def BPS(data: RecordContainer):
 
-    SEQ_NAME = get_cn(data)
+    fields = {}
+    try:
+        fields['SEQ_NAME'] = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return BPSRecord(SEQ_NAME)
+    return BPSRecord(**fields)
 
 @parse_record
 def DTR(data: RecordContainer):
 
-    TEXT_DAT = get_cn(data)
+    fields = {}
+    try:
+        fields['TEXT_DAT'] = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return DTRRecord(TEXT_DAT)
+    return DTRRecord(**fields)
 
 @parse_record
 def EPS(data: RecordContainer):
@@ -186,62 +198,56 @@ def EPS(data: RecordContainer):
 
 @parse_record
 def FAR(data: RecordContainer):
-    
-    CPU_TYPE=get_u(1,data)
-    STDF_VER=get_u(1,data)
 
-    return FARRecord(CPU_TYPE, STDF_VER)
+    fields = {}
+    try:
+        fields['CPU_TYPE'] = get_u(1, data)
+        fields['STDF_VER'] = get_u(1, data)
+    except RecordTruncated:
+        pass
+
+    return FARRecord(**fields)
 
 @parse_record
 def FTR(data: RecordContainer):
 
-    TEST_NUM = get_u(4,data)
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    TEST_FLG = get_u(1,data) #B1
-    OPT_FLAG = get_b(1,data)
-    CYCL_CNT = get_u(4,data)
-    REL_VADR = get_u(4,data)
-    REPT_CNT = get_u(4,data)
-    NUM_FAIL = get_u(4,data)
-    XFAIL_AD = get_i(4,data)
-    YFAIL_AD = get_i(4,data)
-    VECT_OFF = get_i(2,data)
-    RTN_ICNT = get_u(2,data)
-    PGM_ICNT = get_u(2,data)
+    fields = {}
+    try:
+        fields['TEST_NUM'] = get_u(4,data)
+        fields['HEAD_NUM'] = get_u(1,data)
+        fields['SITE_NUM'] = get_u(1,data)
+        fields['TEST_FLG'] = get_u(1,data)
+        fields['OPT_FLG']  = get_b(1,data)
+        fields['CYCL_CNT'] = get_u(4,data)
+        fields['REL_VADR'] = get_u(4,data)
+        fields['REPT_CNT'] = get_u(4,data)
+        fields['NUM_FAIL'] = get_u(4,data)
+        fields['XFAIL_AD'] = get_i(4,data)
+        fields['YFAIL_AD'] = get_i(4,data)
+        fields['VECT_OFF'] = get_i(2,data)
+        fields['RTN_ICNT'] = get_u(2,data)
+        fields['PGM_ICNT'] = get_u(2,data)
+        fields['RTN_INDX'] = get_u(2*fields['RTN_ICNT'],data)
+        fields['RTN_STAT'] = get_u((fields['RTN_ICNT'] // 2) + (fields['RTN_ICNT'] % 2),data)
+        fields['PGM_INDX'] = get_u(2*fields['PGM_ICNT'],data)
+        fields['PGM_STAT'] = get_u((fields['PGM_ICNT'] // 2) + (fields['PGM_ICNT'] % 2),data)
+        fields['FAIL_PIN'] = get_dn(data)
+        fields['VECT_NAME'] = get_cn(data)
+        fields['TIME_SET'] = get_cn(data)
+        fields['OP_CODE']  = get_cn(data)
+        fields['TEST_TXT'] = get_cn(data)
+        fields['ALARM_ID'] = get_cn(data)
+        fields['PROG_TXT'] = get_cn(data)
+        fields['RSLT_TXT'] = get_cn(data)
+        fields['PATG_NUM'] = get_u(1,data)
+        fields['SPIN_MAP'] = get_dn(data)
+    except RecordTruncated:
+        pass
 
-    RTN_INDX = get_u(2*RTN_ICNT,data)
-    RTN_STAT = get_u((RTN_ICNT // 2) + (RTN_ICNT % 2),data)
+    if 'TEST_FLG' in fields:
+        fields['RESULT'] = 1 if fields['TEST_FLG'] & 128 == 0 else 0
 
-    PGM_INDX = get_u(2*PGM_ICNT,data)
-    PGM_STAT = get_u((PGM_ICNT // 2) + (PGM_ICNT % 2),data)
-
-    FAIL_PIN = get_dn(data)
-
-    VECT_NAM = get_cn(data)
-    TIME_SET = get_cn(data)
-    OP_CODE = get_cn(data)
-
-    TEST_TXT = get_cn(data)
-    ALARM_ID = get_cn(data)
-    PROG_TXT = get_cn(data)
-    RSLT_TXT = get_cn(data)
-    PATG_NUM = get_u(1,data)
-    SPIN_MAP = get_dn(data)
-
-    if TEST_FLG&128 == 0:
-        RESULT=1
-    else:
-        RESULT=0
-
-    return FTRRecord(TEST_NUM, HEAD_NUM, SITE_NUM, TEST_FLG,
-                     OPT_FLAG, CYCL_CNT, REL_VADR, REPT_CNT,
-                     NUM_FAIL, XFAIL_AD, YFAIL_AD, VECT_OFF,
-                     RTN_ICNT, PGM_ICNT, RTN_INDX, RTN_STAT,
-                     PGM_INDX, PGM_STAT, FAIL_PIN, VECT_NAM,
-                     TIME_SET, OP_CODE, TEST_TXT, ALARM_ID,
-                     PROG_TXT, RSLT_TXT, PATG_NUM, SPIN_MAP,
-                     RESULT)
+    return FTRRecord(**fields)
 
 @parse_record
 def GDR(data: RecordContainer):
@@ -249,121 +255,109 @@ def GDR(data: RecordContainer):
     return None
  
 @parse_record
-def HBR(data: RecordContainer): 
+def HBR(data: RecordContainer):
 
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    HBIN_NUM = get_u(2,data)
-    HBIN_CNT = get_u(4,data)
-    HBIN_PF = get_c(1,data)
-    HBIN_NAM = get_cn(data)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u(1, data)
+        fields['HBIN_NUM'] = get_u(2, data)
+        fields['HBIN_CNT'] = get_u(4, data)
+        fields['HBIN_PF']  = get_c(1, data)
+        fields['HBIN_NAM'] = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return HBRRecord(HEAD_NUM, SITE_NUM, HBIN_NUM, HBIN_CNT, HBIN_PF, HBIN_NAM)
-
-@parse_record
-def MIR(data: RecordContainer): 
-
-    SETUP_T = get_u(4,data)
-    SETUP_T = datetime(1970,1,1,0,0,0) + timedelta(seconds=SETUP_T)
-    START_T = get_u(4,data)
-    START_T = datetime(1970,1,1,0,0,0) + timedelta(seconds=START_T)
-    STAT_NUM = get_u(1,data)
-    MODE_COD = get_c(1,data)
-    RTST_COD = get_c(1,data)
-    PROT_COD = get_c(1,data)
-    BURN_TIM = get_u(2,data)
-    CMOD_COD = get_c(1,data)
-    LOT_ID = get_cn(data)
-    PART_TYP = get_cn(data)
-    NODE_NAM = get_cn(data)
-    TSTR_TYP = get_cn(data)
-    JOB_NAM = get_cn(data)
-    JOB_REV = get_cn(data)
-    SBLOT_ID = get_cn(data)
-    OPER_NAM = get_cn(data)
-    EXEC_TYP = get_cn(data)
-    EXEC_VER = get_cn(data)
-    TEST_COD = get_cn(data)
-    TST_TEMP = get_cn(data)
-    USER_TXT = get_cn(data)
-    AUX_FILE = get_cn(data)
-    PKG_TYP = get_cn(data)
-    FAMILY_ID = get_cn(data)
-    DATE_COD = get_cn(data)
-    FACIL_ID = get_cn(data)
-    FLOOR_ID = get_cn(data)
-    PROC_ID = get_cn(data)
-    OPER_FRQ = get_cn(data)
-    SPEC_NAM = get_cn(data)
-    SPEC_VER = get_cn(data)
-    FLOW_ID = get_cn(data)
-    SETUP_ID = get_cn(data)
-    DSGN_REV = get_cn(data)
-    ENG_ID = get_cn(data)
-    ROM_COD = get_cn(data)
-    SERL_NUM = get_cn(data)
-    SUPR_NAM = get_cn(data)
-    
-
-    return MIRRecord(SETUP_T, START_T, STAT_NUM, MODE_COD, 
-                     RTST_COD, PROT_COD, BURN_TIM, CMOD_COD, 
-                     LOT_ID, PART_TYP, NODE_NAM, TSTR_TYP, 
-                     JOB_NAM, JOB_REV, SBLOT_ID, OPER_NAM, 
-                     EXEC_TYP, EXEC_VER, TEST_COD, TST_TEMP, 
-                     USER_TXT, AUX_FILE, PKG_TYP, FAMILY_ID, 
-                     DATE_COD, FACIL_ID, FLOOR_ID, PROC_ID, 
-                     OPER_FRQ, SPEC_NAM, SPEC_VER, FLOW_ID, 
-                     SETUP_ID, DSGN_REV, ENG_ID, ROM_COD, 
-                     SERL_NUM, SUPR_NAM)
+    return HBRRecord(**fields)
 
 @parse_record
-def MPR(data: RecordContainer): 
+def MIR(data: RecordContainer):
 
-        TEST_NUM = get_u(4,data)
-        HEAD_NUM = get_u(1,data)
-        SITE_NUM = get_u(1,data)
-        TEST_FLG = get_b(1,data)
-        PARM_FLG = get_b(1,data)
-        RTN_ICNT = get_u(2,data)
-        RSLT_CNT = get_u(2,data)
-        RTN_STAT = get_u((RTN_ICNT // 2) + (RTN_ICNT % 2),data)
-        RTN_RSLT = get_r_arr(4,RSLT_CNT,data)
-        TEST_TXT = get_cn(data)
-        ALARM_ID = get_cn(data)
+    fields = {}
+    try:
+        fields['SETUP_T']   = datetime(1970,1,1,0,0,0) + timedelta(seconds=get_u(4,data))
+        fields['START_T']   = datetime(1970,1,1,0,0,0) + timedelta(seconds=get_u(4,data))
+        fields['STAT_NUM']  = get_u(1, data)
+        fields['MODE_COD']  = get_c(1, data)
+        fields['RTST_COD']  = get_c(1, data)
+        fields['PROT_COD']  = get_c(1, data)
+        fields['BURN_TIM']  = get_u(2, data)
+        fields['CMOD_COD']  = get_c(1, data)
+        fields['LOT_ID']    = get_cn(data)
+        fields['PART_TYP']  = get_cn(data)
+        fields['NODE_NAM']  = get_cn(data)
+        fields['TSTR_TYP']  = get_cn(data)
+        fields['JOB_NAM']   = get_cn(data)
+        fields['JOB_REV']   = get_cn(data)
+        fields['SBLOT_ID']  = get_cn(data)
+        fields['OPER_NAM']  = get_cn(data)
+        fields['EXEC_TYP']  = get_cn(data)
+        fields['EXEC_VER']  = get_cn(data)
+        fields['TEST_COD']  = get_cn(data)
+        fields['TST_TEMP']  = get_cn(data)
+        fields['USER_TXT']  = get_cn(data)
+        fields['AUX_FILE']  = get_cn(data)
+        fields['PKG_TYP']   = get_cn(data)
+        fields['FAMILY_ID'] = get_cn(data)
+        fields['DATE_COD']  = get_cn(data)
+        fields['FACIL_ID']  = get_cn(data)
+        fields['FLOOR_ID']  = get_cn(data)
+        fields['PROC_ID']   = get_cn(data)
+        fields['OPER_FRQ']  = get_cn(data)
+        fields['SPEC_NAM']  = get_cn(data)
+        fields['SPEC_VER']  = get_cn(data)
+        fields['FLOW_ID']   = get_cn(data)
+        fields['SETUP_ID']  = get_cn(data)
+        fields['DSGN_REV']  = get_cn(data)
+        fields['ENG_ID']    = get_cn(data)
+        fields['ROM_COD']   = get_cn(data)
+        fields['SERL_NUM']  = get_cn(data)
+        fields['SUPR_NAM']  = get_cn(data)
+    except RecordTruncated:
+        pass
 
-        OPT_FLAG = get_b(1,data) #B1
-        RES_SCAL = get_i(1,data)
-        LLM_SCAL = get_i(1,data)
-        HLM_SCAL = get_i(1,data)
+    return MIRRecord(**fields)
 
-        LO_LIMIT = get_r(4,data)
-        if OPT_FLAG&64 == 64:
-            LO_LIMIT = np.nan
-        HI_LIMIT = get_r(4,data)
-        if OPT_FLAG&128 == 128:
-            HI_LIMIT = np.nan
+@parse_record
+def MPR(data: RecordContainer):
 
-        START_IN = get_r(4,data)
-        INCR_IN = get_r(4,data)
+    fields = {}
+    try:
+        fields['TEST_NUM'] = get_u(4, data)
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u(1, data)
+        fields['TEST_FLG'] = get_b(1, data)
+        fields['PARM_FLG'] = get_b(1, data)
+        fields['RTN_ICNT'] = get_u(2, data)
+        fields['RSLT_CNT'] = get_u(2, data)
+        fields['RTN_STAT'] = get_u((fields['RTN_ICNT'] // 2) + (fields['RTN_ICNT'] % 2), data)
+        fields['RTN_RSLT'] = get_r_arr(4, fields['RSLT_CNT'], data)
+        fields['TEST_TXT'] = get_cn(data)
+        fields['ALARM_ID'] = get_cn(data)
+        fields['OPT_FLAG'] = get_b(1, data)
+        fields['RES_SCAL'] = get_i(1, data)
+        fields['LLM_SCAL'] = get_i(1, data)
+        fields['HLM_SCAL'] = get_i(1, data)
+        fields['LO_LIMIT'] = get_r(4, data)
+        if fields['OPT_FLAG'][0] & 64 == 64:
+            fields['LO_LIMIT'] = np.nan
+        fields['HI_LIMIT'] = get_r(4, data)
+        if fields['OPT_FLAG'][0] & 128 == 128:
+            fields['HI_LIMIT'] = np.nan
+        fields['START_IN'] = get_r(4, data)
+        fields['INCR_IN']  = get_r(4, data)
+        fields['RTN_INDX'] = get_u_arr(2, fields['RTN_ICNT'], data)
+        fields['UNITS']    = get_cn(data)
+        fields['UNITS_IN'] = get_cn(data)
+        fields['C_RESFMT'] = get_cn(data)
+        fields['C_LLMFMT'] = get_cn(data)
+        fields['C_HLMFMT'] = get_cn(data)
+        fields['LO_SPEC']  = get_r(4, data)
+        fields['HI_SPEC']  = get_r(4, data)
+    except RecordTruncated:
+        pass
 
-        RTN_INDX = get_u_arr(2, RTN_ICNT, data)
-
-        UNITS = get_cn(data)
-        
-        UNITS_IN = get_cn(data)
-        C_RESFMT = get_cn(data)
-        C_LLMFMT = get_cn(data)
-        C_HLMFMT = get_cn(data)
-        LO_SPEC = get_r(4,data)
-        HI_SPEC = get_r(4,data)
-
-        return MPRRecord(   TEST_NUM, HEAD_NUM, SITE_NUM, TEST_FLG,
-                            PARM_FLG, RTN_ICNT, RSLT_CNT, RTN_STAT, 
-                            RTN_RSLT, TEST_TXT, ALARM_ID, OPT_FLAG, 
-                            RES_SCAL, LLM_SCAL, HLM_SCAL, LO_LIMIT, 
-                            HI_LIMIT, START_IN, INCR_IN, RTN_INDX,
-                            UNITS, UNITS_IN, C_RESFMT, C_LLMFMT,
-                            C_HLMFMT, LO_SPEC, HI_SPEC)
+    return MPRRecord(**fields)
 
 
 # def MPR2(fsub,length,containers):
@@ -526,15 +520,18 @@ def MPR(data: RecordContainer):
 #         containers.DebuggerCount(record)
 
 @parse_record
-def MRR(data: RecordContainer): 
+def MRR(data: RecordContainer):
 
-    FINISH_T,var=get_u(4,data)
-    FINISH_T=datetime(1970,1,1,0,0,0) + timedelta(seconds=FINISH_T)
-    DISP_COD,var=get_c(1,data)
-    USR_DESC,var=get_cn(data)
-    EXC_DESC,var=get_cn(data)
+    fields = {}
+    try:
+        fields['FINISH_T'] = datetime(1970,1,1,0,0,0) + timedelta(seconds=get_u(4,data))
+        fields['DISP_COD'] = get_c(1, data)
+        fields['USR_DESC'] = get_cn(data)
+        fields['EXC_DESC'] = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return MRRRecord(FINISH_T, DISP_COD, USR_DESC, EXC_DESC)
+    return MRRRecord(**fields)
 
 @parse_record
 def NULLREC(data: RecordContainer): 
@@ -544,62 +541,82 @@ def NULLREC(data: RecordContainer):
     return NULREcord(CONTENTS)
 
 @parse_record
-def PCR(data: RecordContainer): 
+def PCR(data: RecordContainer):
 
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    PART_CNT = get_u(4,data)
-    RTST_CNT = get_u(4,data)
-    ABRT_CNT = get_u(4,data)
-    GOOD_CNT = get_u(4,data)
-    FUNC_CNT = get_u(4,data)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u(1, data)
+        fields['PART_CNT'] = get_u(4, data)
+        fields['RTST_CNT'] = get_u(4, data)
+        fields['ABRT_CNT'] = get_u(4, data)
+        fields['GOOD_CNT'] = get_u(4, data)
+        fields['FUNC_CNT'] = get_u(4, data)
+    except RecordTruncated:
+        pass
 
-    return PCRRecord(HEAD_NUM, SITE_NUM, PART_CNT, RTST_CNT, ABRT_CNT, GOOD_CNT, FUNC_CNT)
+    return PCRRecord(**fields)
     
 @parse_record
-def PGR(data: RecordContainer): 
+def PGR(data: RecordContainer):
 
-    GRP_INDX = get_u(2,data)
-    GRP_NAM = get_cn(data)
-    INDX_CNT = get_u(2,data)
-    PMR_INDX = get_u_arr(2, INDX_CNT, data)
+    fields = {}
+    try:
+        fields['GRP_INDX'] = get_u(2, data)
+        fields['GRP_NAM']  = get_cn(data)
+        fields['INDX_CNT'] = get_u(2, data)
+        fields['PMR_INDX'] = get_u_arr(2, fields['INDX_CNT'], data)
+    except RecordTruncated:
+        pass
 
-    return PGRRecord(GRP_INDX, GRP_NAM, INDX_CNT, PMR_INDX)
-
-@parse_record
-def PIR(data: RecordContainer): 
-
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    
-    return PIRRecord(HEAD_NUM, SITE_NUM)
+    return PGRRecord(**fields)
 
 @parse_record
-def PLR(data: RecordContainer): 
-    
-    GRP_CNT = get_u(2,data)
-    GRP_INDX = get_u_arr(2, GRP_CNT, data)
-    GRP_MODE = get_u_arr(1, GRP_CNT, data)
-    GRP_RADX = get_u_arr(1, GRP_CNT, data)
-    PGM_CHAR = get_cn_arr(1, GRP_CNT, data)
-    RTN_CHAR = get_cn_arr(1, GRP_CNT, data)
-    PGM_CHAL = get_cn_arr(1, GRP_CNT, data)
-    RTN_CHAL = get_cn_arr(1, GRP_CNT, data)
+def PIR(data: RecordContainer):
 
-    return PLRRecord(GRP_CNT, GRP_INDX, GRP_MODE, GRP_RADX, PGM_CHAR, RTN_CHAR, PGM_CHAL, RTN_CHAL)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u(1, data)
+    except RecordTruncated:
+        pass
+
+    return PIRRecord(**fields)
 
 @parse_record
-def PMR(data: RecordContainer): 
+def PLR(data: RecordContainer):
 
-    PMR_INDX = get_u(2,data)
-    CHAN_TYP = get_u(2,data)
-    CHAN_NAM = get_cn(data)
-    PHY_NAM = get_cn(data)
-    LOG_NAM = get_cn(data)
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
+    fields = {}
+    try:
+        fields['GRP_CNT']  = get_u(2, data)
+        fields['GRP_INDX'] = get_u_arr(2, fields['GRP_CNT'], data)
+        fields['GRP_MODE'] = get_u_arr(1, fields['GRP_CNT'], data)
+        fields['GRP_RADX'] = get_u_arr(1, fields['GRP_CNT'], data)
+        fields['PGM_CHAR'] = get_cn_arr(1, fields['GRP_CNT'], data)
+        fields['RTN_CHAR'] = get_cn_arr(1, fields['GRP_CNT'], data)
+        fields['PGM_CHAL'] = get_cn_arr(1, fields['GRP_CNT'], data)
+        fields['RTN_CHAL'] = get_cn_arr(1, fields['GRP_CNT'], data)
+    except RecordTruncated:
+        pass
 
-    return PMRRecord(PMR_INDX, CHAN_TYP, CHAN_NAM, PHY_NAM, LOG_NAM, HEAD_NUM, SITE_NUM)
+    return PLRRecord(**fields)
+
+@parse_record
+def PMR(data: RecordContainer):
+
+    fields = {}
+    try:
+        fields['PMR_INDX'] = get_u(2, data)
+        fields['CHAN_TYP'] = get_u(2, data)
+        fields['CHAN_NAM'] = get_cn(data)
+        fields['PHY_NAM']  = get_cn(data)
+        fields['LOG_NAM']  = get_cn(data)
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u(1, data)
+    except RecordTruncated:
+        pass
+
+    return PMRRecord(**fields)
 
 @parse_record
 def PRR(data: RecordContainer):
@@ -764,126 +781,144 @@ def PTR(data: RecordContainer):
                                       
 @parse_record
 def RDR(data: RecordContainer):
-    
-    NUM_BINS = get_u(2,data)
-    RTST_BIN = get_u_arr(2, NUM_BINS, data)
 
-    return RDRRecord(NUM_BINS, RTST_BIN)
+    fields = {}
+    try:
+        fields['NUM_BINS'] = get_u(2, data)
+        fields['RTST_BIN'] = get_u_arr(2, fields['NUM_BINS'], data)
+    except RecordTruncated:
+        pass
+
+    return RDRRecord(**fields)
 
 @parse_record
 def SBR(data: RecordContainer):
 
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    SBIN_NUM = get_u(2,data)
-    SBIN_CNT = get_u(4,data)
-    SBIN_PF = get_c(1,data)
-    SBIN_NAM = get_cn(data)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u(1, data)
+        fields['SBIN_NUM'] = get_u(2, data)
+        fields['SBIN_CNT'] = get_u(4, data)
+        fields['SBIN_PF']  = get_c(1, data)
+        fields['SBIN_NAM'] = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return SBRRecord(HEAD_NUM, SITE_NUM, SBIN_NUM, SBIN_CNT, SBIN_PF, SBIN_NAM)
+    return SBRRecord(**fields)
 
 @parse_record
 def SDR(data: RecordContainer):
 
-    HEAD_NUM = get_u(1,data)
-    SITE_GRP = get_u(1,data)
-    SITE_CNT = get_u(1,data)
-    SITE_NUM = get_u_arr(1,SITE_CNT,data)
-    HAND_TYP = get_cn(data)
-    HAND_ID = get_cn(data)
-    CARD_TYP = get_cn(data)
-    CARD_ID = get_cn(data)
-    LOAD_TYP = get_cn(data)
-    LOAD_ID = get_cn(data)
-    DIB_TYP = get_cn(data)
-    DIB_ID = get_cn(data)
-    CABL_TYP = get_cn(data)
-    CABL_ID = get_cn(data)
-    CONT_TYP = get_cn(data)
-    CONT_ID = get_cn(data)
-    LASR_TYP = get_cn(data)
-    LASR_ID = get_cn(data)
-    EXTR_TYP = get_cn(data)
-    EXTR_ID = get_cn(data)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_GRP'] = get_u(1, data)
+        fields['SITE_CNT'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u_arr(1, fields['SITE_CNT'], data)
+        fields['HAND_TYP'] = get_cn(data)
+        fields['HAND_ID']  = get_cn(data)
+        fields['CARD_TYP'] = get_cn(data)
+        fields['CARD_ID']  = get_cn(data)
+        fields['LOAD_TYP'] = get_cn(data)
+        fields['LOAD_ID']  = get_cn(data)
+        fields['DIB_TYP']  = get_cn(data)
+        fields['DIB_ID']   = get_cn(data)
+        fields['CABL_TYP'] = get_cn(data)
+        fields['CABL_ID']  = get_cn(data)
+        fields['CONT_TYP'] = get_cn(data)
+        fields['CONT_ID']  = get_cn(data)
+        fields['LASR_TYP'] = get_cn(data)
+        fields['LASR_ID']  = get_cn(data)
+        fields['EXTR_TYP'] = get_cn(data)
+        fields['EXTR_ID']  = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return SDRRecord(HEAD_NUM, SITE_GRP, SITE_CNT, SITE_NUM,
-                     HAND_TYP, HAND_ID, CARD_TYP, CARD_ID,
-                     LOAD_TYP, LOAD_ID, DIB_TYP, DIB_ID,
-                     CABL_TYP, CABL_ID, CONT_TYP, CONT_ID,
-                     LASR_TYP, LASR_ID, EXTR_TYP, EXTR_ID)
+    return SDRRecord(**fields)
 
 @parse_record
 def TSR(data: RecordContainer):
 
-    HEAD_NUM = get_u(1,data)
-    SITE_NUM = get_u(1,data)
-    TEST_TYP = get_c(1,data)
-    TEST_NUM = get_u(4,data)
-    EXEC_CNT = get_u(4,data)
-    FAIL_CNT = get_u(4,data)
-    ALRM_CNT = get_u(4,data)
-    TEST_NAM = get_cn(data)
-    SEQ_NAME = get_cn(data)
-    TEST_LBL = get_cn(data)
-    OPT_FLAG = get_b(1,data)
-    TEST_TIM = get_r(4,data)
-    TEST_MIN = get_r(4,data)
-    TEST_MAX = get_r(4,data)
-    TST_SUMS = get_r(4,data)
-    TST_SQRS = get_r(4,data)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_NUM'] = get_u(1, data)
+        fields['TEST_TYP'] = get_c(1, data)
+        fields['TEST_NUM'] = get_u(4, data)
+        fields['EXEC_CNT'] = get_u(4, data)
+        fields['FAIL_CNT'] = get_u(4, data)
+        fields['ALRM_CNT'] = get_u(4, data)
+        fields['TEST_NAM'] = get_cn(data)
+        fields['SEQ_NAME'] = get_cn(data)
+        fields['TEST_LBL'] = get_cn(data)
+        fields['OPT_FLAG'] = get_b(1, data)
+        fields['TEST_TIM'] = get_r(4, data)
+        fields['TEST_MIN'] = get_r(4, data)
+        fields['TEST_MAX'] = get_r(4, data)
+        fields['TST_SUMS'] = get_r(4, data)
+        fields['TST_SQRS'] = get_r(4, data)
+    except RecordTruncated:
+        pass
 
-    return TSRRecord(HEAD_NUM, SITE_NUM, TEST_TYP, TEST_NUM,
-                     EXEC_CNT, FAIL_CNT, ALRM_CNT, TEST_NAM, 
-                     SEQ_NAME, TEST_LBL, OPT_FLAG, TEST_TIM, 
-                     TEST_MIN, TEST_MAX, TST_SUMS, TST_SQRS)
+    return TSRRecord(**fields)
 
 @parse_record
 def WCR(data: RecordContainer):
-    
-    WAFR_SIZ = get_r(4,data)
-    DIE_HT = get_r(4,data)
-    DIE_WID = get_r(4,data)
-    WF_UNITS = get_u(1,data)
-    WF_FLAT = get_c(1,data)
-    CENTER_X = get_i(2,data)
-    CENTER_Y = get_i(2,data)
-    POS_X = get_c(1,data)
-    POS_Y = get_c(1,data)
 
-    return WCRRecord(DIE_HT, DIE_WID, WF_UNITS, WF_FLAT, CENTER_X, CENTER_Y, POS_X, POS_Y)
+    fields = {}
+    try:
+        fields['WAFR_SIZ'] = get_r(4, data)
+        fields['DIE_HT']   = get_r(4, data)
+        fields['DIE_WID']  = get_r(4, data)
+        fields['WF_UNITS'] = get_u(1, data)
+        fields['WF_FLAT']  = get_c(1, data)
+        fields['CENTER_X'] = get_i(2, data)
+        fields['CENTER_Y'] = get_i(2, data)
+        fields['POS_X']    = get_c(1, data)
+        fields['POS_Y']    = get_c(1, data)
+    except RecordTruncated:
+        pass
+
+    return WCRRecord(**fields)
 
 @parse_record
 def WIR(data: RecordContainer):
 
-    HEAD_NUM = get_u(1,data)
-    SITE_GRP = get_u(1,data)
-    START_T = get_u(4,data)
-    WAFER_ID = get_cn(data)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_GRP'] = get_u(1, data)
+        fields['START_T']  = get_u(4, data)
+        fields['WAFER_ID'] = get_cn(data)
+    except RecordTruncated:
+        pass
 
-    return WIRRecord(HEAD_NUM, SITE_GRP, START_T, WAFER_ID)
+    return WIRRecord(**fields)
 
 @parse_record
 def WRR(data: RecordContainer):
-    
-    HEAD_NUM = get_u(1,data)
-    SITE_GRP = get_u(1,data)
-    FINISH_T = get_u(4,data)
-    PART_CNT = get_u(4,data)
-    RTST_CNT = get_u(4,data)
-    ABRT_CNT = get_u(4,data)
-    GOOD_CNT = get_u(4,data)
-    FUNC_CNT = get_u(4,data)
-    WAFER_ID = get_cn(data)
-    FABWF_ID = get_cn(data)
-    FRAME_ID = get_cn(data)
-    MASK_ID = get_cn(data)
-    USR_DESC = get_cn(data)
-    EXC_DESC = get_cn(data)
 
-    return WRRRecord(HEAD_NUM, SITE_GRP, FINISH_T, PART_CNT,
-                     RTST_CNT, ABRT_CNT, GOOD_CNT, FUNC_CNT,
-                     WAFER_ID, FABWF_ID, FRAME_ID, MASK_ID,
-                     USR_DESC, EXC_DESC)
+    fields = {}
+    try:
+        fields['HEAD_NUM'] = get_u(1, data)
+        fields['SITE_GRP'] = get_u(1, data)
+        fields['FINISH_T'] = get_u(4, data)
+        fields['PART_CNT'] = get_u(4, data)
+        fields['RTST_CNT'] = get_u(4, data)
+        fields['ABRT_CNT'] = get_u(4, data)
+        fields['GOOD_CNT'] = get_u(4, data)
+        fields['FUNC_CNT'] = get_u(4, data)
+        fields['WAFER_ID'] = get_cn(data)
+        fields['FABWF_ID'] = get_cn(data)
+        fields['FRAME_ID'] = get_cn(data)
+        fields['MASK_ID']  = get_cn(data)
+        fields['USR_DESC'] = get_cn(data)
+        fields['EXC_DESC'] = get_cn(data)
+    except RecordTruncated:
+        pass
+
+    return WRRRecord(**fields)
 
 
 
