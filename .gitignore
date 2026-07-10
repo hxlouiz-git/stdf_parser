@@ -137,3 +137,4 @@ Thumbs.db
 #STDF-v4-spec.pdf
 *.csv
 *.stdf
+*build_cython/

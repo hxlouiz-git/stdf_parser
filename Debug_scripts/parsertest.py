@@ -1,0 +1,4 @@
+from stdf_parse import parse
+
+
+data = parse('STZ0394HBR05_ASE-252500248.000_FT2_125C_FT21ST01_ACPWSFTD1X-006_20241213090010.std')

@@ -61,6 +61,7 @@ def get_all(data):
     val = data.length
     content = data.read(val)
 
+    ret = 0
     for i in range(val):
         ret |= content[i] << (8 * i)
 
